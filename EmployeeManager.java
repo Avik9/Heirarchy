@@ -1,6 +1,3 @@
-import org.jetbrains.annotations.NotNull;
-
-import javax.swing.plaf.basic.BasicInternalFrameTitlePane;
 import java.awt.*;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -65,7 +62,16 @@ public class EmployeeManager {
                 break;
 
             case ('P'):
-                print(employees_name.get("Edward Rosenfeld"), 4);
+                for(EmployeeNode HPValue: employees_name.values())
+                {
+                    if(HPValue.getManager().getName().contains("MANAGER"))
+                    {
+                        print(HPValue, 4);
+                        break;
+                    }
+                }
+
+                menu();
                 break;
 
             case ('S'):
@@ -349,7 +355,7 @@ public class EmployeeManager {
      * @param node   The node to print the tree from.
      * @param spaces Spaces to leave horizontally before printing the next leaf
      */
-    private static void print(@NotNull EmployeeNode node, int spaces) {
+    private static void print(EmployeeNode node, int spaces) {
         System.out.print("+ ");
 
         System.out.print(node.info() + "\n");
@@ -368,7 +374,7 @@ public class EmployeeManager {
      * @param node          The manager
      * @param newDepartment The new department
      */
-    private static void changeDepartment(@NotNull EmployeeNode node, String newDepartment) {
+    private static void changeDepartment(EmployeeNode node, String newDepartment) {
 
         node.setDepartment_name(newDepartment);
 

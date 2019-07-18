@@ -10,7 +10,7 @@ public class EmployeeNode {
             preferred_name, email, title, company, department_name, old_department_name, payroll_department, location,
             month, day, gender, manager_employee_number, original_manager_name;
     private EmployeeNode manager;
-    private ArrayList reporters;
+    private ArrayList<EmployeeNode> reporters;
 
     /**
      * Consists of all the  parameters of this class to create a full Employee Node object
@@ -140,7 +140,7 @@ public class EmployeeNode {
      *
      * @return reporters
      */
-    ArrayList getReporters() {
+    ArrayList<EmployeeNode> getReporters() {
         return reporters;
     }
 
