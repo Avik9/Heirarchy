@@ -60,7 +60,7 @@ public class EmployeeNode {
         this.employee_number = new_employee_number;
         this.manager_employee_number = manager_employeeNumber;
         this.original_manager_name = initial_manager_name.replace("\"", "");
-        this.reporters = new ArrayList<EmployeeNode>();
+        this.reporters = new ArrayList<>();
     }
 
     /**
@@ -78,7 +78,7 @@ public class EmployeeNode {
         this.old_department_name = department_name;
         this.manager = newManager;
         this.employee_number = new_employee_number;
-        this.reporters = new ArrayList<EmployeeNode>();
+        this.reporters = new ArrayList<>();
     }
 
     /**
@@ -95,7 +95,7 @@ public class EmployeeNode {
      *
      * @return first_name
      */
-    private String getFirstName() {
+    String getFirstName() {
         return first_name;
     }
 
@@ -130,6 +130,7 @@ public class EmployeeNode {
      * Changes the manager object of the employee
      *
      * @param manager
+     *      The new manager object
      */
     void setManager(EmployeeNode manager) {
         this.manager = manager;
@@ -166,6 +167,7 @@ public class EmployeeNode {
      * Changes the employee's manager's employee Id
      *
      * @param manager_employee_number
+     *      The new manager_employee_number
      */
     void setManager_employee_number(String manager_employee_number) {
         this.manager_employee_number = manager_employee_number;
@@ -194,7 +196,7 @@ public class EmployeeNode {
      *
      * @return last_name
      */
-    private String getLastName() {
+    String getLastName() {
         return last_name;
     }
 
@@ -293,7 +295,7 @@ public class EmployeeNode {
      *
      * @return original_manager_name
      */
-    public String getOriginal_manager_name() {
+    private String getOriginal_manager_name() {
         return original_manager_name;
     }
 
@@ -311,7 +313,7 @@ public class EmployeeNode {
      *
      * @return Name, Department, Manager's name
      */
-    public String about()
+    String about()
     {
         return this.getFirstName() + " " + this.getLastName() + " works in " + this.getDepartment_name() + " under " + this.getManager().getName();
     }

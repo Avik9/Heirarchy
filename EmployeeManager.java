@@ -1,10 +1,11 @@
 import java.awt.*;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.HashMap;
-import java.util.Scanner;
+//import java.io.File;
+//import java.io.FileNotFoundException;
+//import java.io.IOException;
+import java.io.*; //PrintWriter;
+import java.util.*; //ArrayList;
+//import java.util.HashMap;
+//import java.util.Scanner;
 
 /**
  * Reads a given file and manages all the employees read from the file.
@@ -16,7 +17,7 @@ public class EmployeeManager {
     private static HashMap<String, EmployeeNode> employees_name = new HashMap<>();
     private static HashMap<String, String> relations = new HashMap<>();
     private static HashMap<String, EmployeeNode> employees_number = new HashMap<>();
-    private static EmployeeNode tempEmployee, tempManager;
+    private static EmployeeNode tempEmployee;
     private static Scanner sc = new Scanner(System.in);
     private static boolean quitRunning = false; // determines if the code should keep running
 
@@ -31,11 +32,12 @@ public class EmployeeManager {
     /**
      * The menu that presents options to manipulate the auction system.
      */
-    public static void menu() {
+    private static void menu() {
         System.out.println(
                 "\nMenu:\n" +
                         "\t(I) - Import Data from .csv file\n" +
                         "\t(F) - Find a employee\n" +
+                        "\t(L) - Look for a name\n" +
                         "\t(P) - Print All Employees\n" +
                         "\t(S) - Save to .csv file\n" +
                         "\t(V) - View the .csv file\n" +
@@ -54,12 +56,19 @@ public class EmployeeManager {
 
         switch (letter) {
             case ('I'):
-                loadfile();
+                loadFile();
                 break;
 
             case ('F'):
                 findEmployee();
                 break;
+
+            case ('L'): {
+                System.out.print("Please enter a name you would like to search for: ");
+
+                lookForEmployee(sc.nextLine());
+                break;
+            }
 
             case ('P'):
                 for(EmployeeNode HPValue: employees_name.values())
@@ -74,11 +83,10 @@ public class EmployeeManager {
                 menu();
                 break;
 
-            case ('S'):
-                saveToCSV();
+            case ('S'): saveToCSV();
                 break;
 
-            case 'V': viewCSV();
+            case ('V'): viewCSV();
                 break;
 
             case ('Q'):
@@ -94,61 +102,136 @@ public class EmployeeManager {
     }
 
     /**
+     * Looks for the name passed in as a parameter within all the names.
+     *
+     * @param name
+     *      The name of the person to look for
+     *
+     * @return
+     *      The name as it is in the system
+     */
+    private static String lookForEmployee(String name)
+    {
+        String first_name, last_name;
+
+        ArrayList<String> names = new ArrayList<>();
+
+        for (EmployeeNode HPValue : employees_name.values()) {
+            if (HPValue.getName().equalsIgnoreCase(name)) {
+                if (!names.contains(HPValue.getName())) {
+                    names.add(HPValue.getName());
+                }
+            } else if (name.contains(" ")) {
+                first_name = name.substring(0, name.indexOf(" "));
+                last_name = name.substring(name.indexOf(" ") + 1);
+
+                if (HPValue.getName().toLowerCase().contains(first_name.toLowerCase())) {
+                    if (!names.contains(HPValue.getName())) {
+                        names.add(HPValue.getName());
+                    }
+                } else if (HPValue.getName().toLowerCase().contains(last_name.toLowerCase())) {
+                    if (!names.contains(HPValue.getName())) {
+                        names.add(HPValue.getName());
+                    }
+                }
+            } else {
+                if (HPValue.getFirstName().trim().toLowerCase().contains(name.toLowerCase())) {
+                    if (!names.contains(HPValue.getName())) {
+                        names.add(HPValue.getName());
+                    }
+                }
+
+                if (HPValue.getLastName().trim().toLowerCase().contains(name.toLowerCase())) {
+                    if (!names.contains(HPValue.getName())) {
+                        names.add(HPValue.getName());
+                    }
+                }
+            }
+        }
+
+        if(names.isEmpty())
+        {
+            System.out.println("There were no names that were similar");
+        }
+        else
+        {
+            for(String x: names)
+                System.out.println(x);
+        }
+
+        if(names.size() == 1)
+        {
+            return names.get(0);
+        }
+
+        menu();
+
+        return "";
+    }
+
+    /**
      * Finds an employee and allows you to manage the employee and all of their employees
      */
     private static void findEmployee() {
         System.out.println("Please enter the name of the employee:");
         String findEmployee = sc.nextLine();
 
-        if (employees_name.containsKey(findEmployee)) {
-            tempEmployee = employees_name.get(findEmployee);
+        String findNewEmployee = lookForEmployee(findEmployee);
 
-            System.out.println("What would you like to do:\n" +
-                    "\t(P) Print information about this employee\n" +
-                    "\t(A) Print information about this employee and all it employees\n" +
-                    "\t(C) Change department of this employee and everyone who reports to them\n" +
-                    "\t(K) Change department of this employee only");
+        if(!findNewEmployee.equals(""))
+        {
+            findEmployee = findNewEmployee;
+        }
 
-            char option = sc.nextLine().toUpperCase().charAt(0);
+        for (EmployeeNode HPValue : employees_name.values()) {
+            if (HPValue.getName().equalsIgnoreCase(findEmployee)) {
+                System.out.println("What would you like to do:\n" +
+                        "\t(P) Print information about this employee\n" +
+                        "\t(A) Print information about this employee and all it employees\n" +
+                        "\t(C) Change department of this employee and everyone who reports to them\n" +
+                        "\t(K) Change department of this employee only");
 
-            switch (option) {
+                char option = sc.nextLine().toUpperCase().charAt(0);
 
-                case 'P':
-                    System.out.print(tempEmployee.about());
+                switch (option) {
+
+                    case 'P':
+                        System.out.print(tempEmployee.about());
+                        break;
+
+                    case 'A':
+                        print(tempEmployee, 4);
+                        break;
+
+                    case 'K': {
+                        System.out.println("What do you want as his/her new department?");
+                        tempEmployee.setDepartment_name(sc.nextLine());
+                    }
                     break;
 
-                case 'A':
-                    print(tempEmployee, 4);
+                    case 'C': {
+                        System.out.println("What do you want as their new department?");
+                        changeDepartment(tempEmployee, sc.nextLine());
+                    }
                     break;
 
-                case 'K': {
-                    System.out.println("What do you want as his/her new department?");
-                    tempEmployee.setDepartment_name(sc.nextLine());
+                    default:
+                        System.out.println("There is no such option. Please try again");
+                        runMenu();
+                        break;
                 }
-                break;
+            } else {
+                System.out.println("This employee is not in the data base. Please try again");
 
-                case 'C': {
-                    System.out.println("What do you want as their new department?");
-                    changeDepartment(tempEmployee, sc.nextLine());
-                }
-                break;
-
-                default:
-                    System.out.println("There is no such option. Please try again");
-                    runMenu();
-                    break;
+                menu();
             }
-        } else {
-            System.out.println("This employee is not in the data base. Please try again");
-
-            menu();
         }
     }
 
     /**
      * Loads the data present in the .csv file
      */
-    private static void loadfile() {
+    private static void loadFile() {
         int x = 0;
 
         try {
@@ -282,7 +365,7 @@ public class EmployeeManager {
                     original_manager_name = "";
                 }
 
-                tempManager = new EmployeeNode("TEMPORARY MANAGER", "TEMPORARY MANAGER", null, "-999999999");
+                EmployeeNode tempManager = new EmployeeNode("TEMPORARY MANAGER", "TEMPORARY MANAGER", null, "-999999999");
                 tempEmployee = (new EmployeeNode(first_name, last_name, name, middle_name, former_name, preferred_name,
                         email, title, company, department, payroll_department, location, month, day, gender, tempManager,
                         employeeNumber, manager_employeeNumber, original_manager_name));
@@ -364,7 +447,7 @@ public class EmployeeManager {
             for (int s = 0; s < spaces; s++) {
                 System.out.print("  ");
             }
-            print((EmployeeNode) node.getReporters().get(i), spaces + 4);
+            print(node.getReporters().get(i), spaces + 4);
         }
     }
 
@@ -381,7 +464,7 @@ public class EmployeeManager {
         System.out.println(node.getName() + " used to work for " + node.getOldDepartmentName() + " but now works for " + node.getDepartment_name());
 
         for (int i = 0; i < node.getReporters().size(); i++) {
-            changeDepartment((EmployeeNode) node.getReporters().get(i), newDepartment);
+            changeDepartment(node.getReporters().get(i), newDepartment);
         }
     }
 
@@ -415,7 +498,7 @@ public class EmployeeManager {
     /**
      * Opens the .csv file to view.
      */
-    public static void viewCSV() {
+    private static void viewCSV() {
         System.out.print("Please write the path of the file: ");
         String pathName = sc.nextLine();
 
