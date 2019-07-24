@@ -178,7 +178,7 @@ public class EmployeeNode {
      *
      * @return email
      */
-    private String getEmail() {
+    String getEmail() {
         return email;
     }
 
@@ -232,7 +232,7 @@ public class EmployeeNode {
      *
      * @return title
      */
-    private String getTitle() {
+    String getTitle() {
         return title;
     }
 
