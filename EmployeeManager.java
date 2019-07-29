@@ -21,7 +21,7 @@ public class EmployeeManager {
     private static HashMap<String, EmployeeNode> employees_number = new HashMap<>();
     private static EmployeeNode tempEmployee;
     private static Scanner sc = new Scanner(System.in);
-    private static boolean quitRunning = false; // determines if the code should keep running
+    private static boolean quitRunning = false;
 
     public static void main(String[] args) {
         System.out.println("Hello and welcome to the Employee Tree Script. Please select what you would like to do from the following menu.");
@@ -29,8 +29,6 @@ public class EmployeeManager {
         while (!quitRunning) {
             menu();
         }
-
-//        POIFSFileSystem fs = new POIFSFileSystem(new FileInputStream(file));
     }
 
     /**
@@ -122,7 +120,8 @@ public class EmployeeManager {
 //            }
 
             case ('Q'):
-                quitRunning = true;
+                // determines if the code should keep running
+                boolean quitRunning = true;
                 System.out.println("Sorry to see you go. Until next time :)");
                 break;
 
@@ -268,6 +267,7 @@ public class EmployeeManager {
             sc = new Scanner(f);
 
             sc.nextLine();
+
             String currentline, employeeNumber, first_name, last_name, name, middle_name, former_name, preferred_name, email, title, company, department, payroll_department, location, month, day, gender, manager_name, original_manager_name, manager_employeeNumber;
 
             while (sc.hasNextLine()) {
