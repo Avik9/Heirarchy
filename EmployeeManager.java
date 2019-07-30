@@ -1,13 +1,12 @@
-import java.awt.*;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Scanner;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 
+import java.awt.*;
+import java.io.*;
+import java.util.*;
 
 /**
  * Reads a given file and manages all the employees read from the file.
@@ -57,6 +56,15 @@ public class EmployeeManager {
         char letter = sc.nextLine().toUpperCase().charAt(0);
 
         switch (letter) {
+            case ('A'): {
+                for (EmployeeNode HPValue : employees_name.values()) {
+                    System.out.println(HPValue.toString());
+                }
+            }
+
+                menu();
+                break;
+
             case ('I'):
                 loadFile();
                 break;
@@ -121,7 +129,7 @@ public class EmployeeManager {
 
             case ('Q'):
                 // determines if the code should keep running
-                boolean quitRunning = true;
+                quitRunning = true;
                 System.out.println("Sorry to see you go. Until next time :)");
                 break;
 
@@ -263,196 +271,255 @@ public class EmployeeManager {
             System.out.print("Please write the name of the file: ");
             String filename = sc.nextLine();
 
-            File f = new File(filename);
-            sc = new Scanner(f);
+            filename = filename.replaceAll("\"", "");
 
-            sc.nextLine();
+            if (filename.contains(".xls")) {
+                File excelFile = new File(filename);
+                FileInputStream fis = new FileInputStream(excelFile);
 
-            String currentline, employeeNumber, first_name, last_name, name, middle_name, former_name, preferred_name, email, title, company, department, payroll_department, location, month, day, gender, manager_name, original_manager_name, manager_employeeNumber;
+                // we create an XSSF Workbook object for our XLSX Excel File
+                Workbook workBook = new HSSFWorkbook(fis);
 
-            while (sc.hasNextLine()) {
-                x++;
+                File tempcsv = new File("Temp_CSV.csv");
+                FileWriter csvWriter = new FileWriter(tempcsv);
 
-                currentline = sc.nextLine();
+                // we get first sheet
+                Sheet sheet = workBook.getSheetAt(workBook.getNumberOfSheets() - 1);
 
-                // Getting the employee number
+                // we iterate on rows
 
-                employeeNumber = currentline.substring(0, currentline.indexOf(","));
-                currentline = currentline.substring(currentline.indexOf(",") + 1);
+                for (Row row : sheet) {
+                    // iterate on cells for the current row
+                    Iterator<Cell> cellIterator = row.cellIterator();
 
-                // Getting the employee's name
+                    while (cellIterator.hasNext()) {
+                        Cell cell = cellIterator.next();
 
-                first_name = name = currentline.substring(0, currentline.indexOf(","));
-                currentline = currentline.substring(currentline.indexOf(",") + 1);
+                        if (cell.toString().contains(",")) {
+                            csvWriter.append("\"" + cell.toString() + "\"" + ",");
+                        } else if (cell.toString().contains("\n")) {
 
-                last_name = currentline.substring(0, currentline.indexOf(","));
-
-                name += " " + currentline.substring(0, currentline.indexOf(","));
-                currentline = currentline.substring(currentline.indexOf(",") + 1);
-
-                // Getting the middle name
-
-                middle_name = currentline.substring(0, currentline.indexOf(","));
-                currentline = currentline.substring(currentline.indexOf(",") + 1);
-
-                // Getting the former name
-
-                former_name = currentline.substring(0, currentline.indexOf(","));
-                currentline = currentline.substring(currentline.indexOf(",") + 1);
-
-                // Getting the preferred name
-
-                if (currentline.substring(0, 5).contains("\"")) {
-                    preferred_name = currentline.substring(currentline.indexOf("\""), currentline.indexOf(","));
-                    currentline = currentline.substring(currentline.indexOf(",") + 1);
-                    preferred_name += "," + currentline.substring(0, currentline.indexOf(","));
-                    preferred_name = preferred_name.trim().replace("\"", "");
-
-                    currentline = currentline.substring(2);
-                } else {
-                    preferred_name = currentline.substring(0, currentline.indexOf(","));
+                        } else {
+                            csvWriter.append(cell.toString() + ",");
+                        }
+                    }
+                    csvWriter.append("\n");
+                    csvWriter.flush();
                 }
+                workBook.close();
+                fis.close();
 
-                currentline = currentline.substring(currentline.indexOf(",") + 1);
+                filename = tempcsv.getPath();
+            }
+            if (filename.contains(".csv")) {
+                File f = new File(filename);
+                sc = new Scanner(f);
 
-                // Getting the email
+                sc.nextLine();
 
-                email = currentline.substring(0, currentline.indexOf(","));
-                currentline = currentline.substring(currentline.indexOf(",") + 1);
+                employees_name = new HashMap<>();
+                relations = new HashMap<>();
+                employees_number = new HashMap<>();
 
-                // Getting the title
+                String currentline, employeeNumber, first_name, last_name, name, middle_name, former_name, preferred_name, email, title, company, department, payroll_department, location, month, day, gender, manager_name, original_manager_name, manager_employeeNumber;
 
-                title = currentline.substring(0, currentline.indexOf(","));
-                currentline = currentline.substring(currentline.indexOf(",") + 1);
+                while (sc.hasNextLine()) {
+                    x++;
 
-                // Getting the company
+                    currentline = sc.nextLine();
 
-                company = currentline.substring(0, currentline.indexOf(","));
-                currentline = currentline.substring(currentline.indexOf(",") + 1);
+                    // Getting the employee number
 
-                // Getting the payroll department
+                    employeeNumber = currentline.substring(0, currentline.indexOf(","));
+                    currentline = currentline.substring(currentline.indexOf(",") + 1);
 
-                payroll_department = currentline.substring(0, currentline.indexOf(","));
-                currentline = currentline.substring(currentline.indexOf(",") + 1);
+                    // Getting the employee's name
 
-                // Getting the department name
+                    first_name = name = currentline.substring(0, currentline.indexOf(","));
+                    currentline = currentline.substring(currentline.indexOf(",") + 1);
 
-                department = currentline.substring(0, currentline.indexOf(","));
-                currentline = currentline.substring(currentline.indexOf(",") + 1);
+                    last_name = currentline.substring(0, currentline.indexOf(","));
 
-                // Getting the location name
+                    name += " " + currentline.substring(0, currentline.indexOf(","));
+                    currentline = currentline.substring(currentline.indexOf(",") + 1);
 
-                location = currentline.substring(0, currentline.indexOf(","));
-                currentline = currentline.substring(currentline.indexOf(",") + 1);
+                    // Getting the middle name
 
-                // Getting the birth month
+                    middle_name = currentline.substring(0, currentline.indexOf(","));
+                    currentline = currentline.substring(currentline.indexOf(",") + 1);
 
-                month = currentline.substring(0, currentline.indexOf(","));
-                currentline = currentline.substring(currentline.indexOf(",") + 1);
+                    // Getting the former name
 
-                // Getting the birth day
+                    former_name = currentline.substring(0, currentline.indexOf(","));
+                    currentline = currentline.substring(currentline.indexOf(",") + 1);
 
-                day = currentline.substring(0, currentline.indexOf(","));
-                currentline = currentline.substring(currentline.indexOf(",") + 1);
+                    // Getting the preferred name
 
-                // Getting the gender
+                    if (currentline.substring(0, 5).contains("\"")) {
+                        preferred_name = currentline.substring(currentline.indexOf("\""), currentline.indexOf(","));
+                        currentline = currentline.substring(currentline.indexOf(",") + 1);
+                        preferred_name += "," + currentline.substring(0, currentline.indexOf(","));
+                        preferred_name = preferred_name.trim().replace("\"", "");
 
-                gender = currentline.substring(0, currentline.indexOf(","));
-                currentline = currentline.substring(currentline.indexOf(",") + 1);
+                        currentline = currentline.substring(2);
+                    } else {
+                        preferred_name = currentline.substring(0, currentline.indexOf(","));
+                    }
 
-                // Getting the manager's name
+                    currentline = currentline.substring(currentline.indexOf(",") + 1);
 
-                if (currentline.substring(currentline.lastIndexOf(",") + 1).length() > 2) {
-                    manager_employeeNumber = currentline.substring(currentline.lastIndexOf(",") + 1);
-                    original_manager_name = manager_name = currentline.substring(currentline.indexOf("\""), currentline.lastIndexOf("\""));
-                    manager_name = manager_name.substring(manager_name.indexOf("\"") + 1);
-                    manager_name += " " + manager_name.substring(0, manager_name.indexOf(","));
-                    manager_name = manager_name.substring(manager_name.indexOf(",") + 1);
+                    // Getting the email
 
-                    if (manager_name.contains("\"")) {
+                    email = currentline.substring(0, currentline.indexOf(","));
+                    currentline = currentline.substring(currentline.indexOf(",") + 1);
 
-                        currentline = currentline.substring(currentline.indexOf("\"") + 1);
-                        name = currentline.substring(0, currentline.indexOf("\""));
-                        name += " " + name.substring(0, name.indexOf(","));
-                        name = name.substring(name.indexOf(",") + 1);
+                    // Getting the title
 
-                        manager_name = manager_name.substring(manager_name.lastIndexOf("\"") + 1);
+                    title = currentline.substring(0, currentline.indexOf(","));
+                    currentline = currentline.substring(currentline.indexOf(",") + 1);
+
+                    // Getting the company
+
+                    company = currentline.substring(0, currentline.indexOf(","));
+                    currentline = currentline.substring(currentline.indexOf(",") + 1);
+
+                    // Getting the payroll department
+
+                    payroll_department = currentline.substring(0, currentline.indexOf(","));
+                    currentline = currentline.substring(currentline.indexOf(",") + 1);
+
+                    // Getting the department name
+
+                    department = currentline.substring(0, currentline.indexOf(","));
+                    currentline = currentline.substring(currentline.indexOf(",") + 1);
+
+                    // Getting the location name
+
+                    location = currentline.substring(0, currentline.indexOf(","));
+                    currentline = currentline.substring(currentline.indexOf(",") + 1);
+
+                    // Getting the birth month
+
+                    month = currentline.substring(0, currentline.indexOf(","));
+                    currentline = currentline.substring(currentline.indexOf(",") + 1);
+
+                    // Getting the birth day
+
+                    day = currentline.substring(0, currentline.indexOf(","));
+                    currentline = currentline.substring(currentline.indexOf(",") + 1);
+
+                    // Getting the gender
+
+                    gender = currentline.substring(0, currentline.indexOf(","));
+                    currentline = currentline.substring(currentline.indexOf(",") + 1);
+
+                    // Getting the manager's name
+
+                    if (currentline.endsWith(",")) {
+                        currentline = currentline.substring(0, currentline.lastIndexOf(","));
+                    }
+
+                    if (currentline.substring(currentline.lastIndexOf(",") + 1).length() > 2) {
+                        manager_employeeNumber = currentline.substring(currentline.lastIndexOf(",") + 1);
+                        original_manager_name = manager_name = currentline.substring(currentline.indexOf("\""), currentline.lastIndexOf("\""));
+                        manager_name = manager_name.substring(manager_name.indexOf("\"") + 1);
                         manager_name += " " + manager_name.substring(0, manager_name.indexOf(","));
                         manager_name = manager_name.substring(manager_name.indexOf(",") + 1);
-                        manager_name = manager_name.substring(0, manager_name.indexOf(" ")) + manager_name.substring(manager_name.lastIndexOf(" "));
-                    }
 
-                    if (!relations.containsKey(manager_name)) {
-                        manager_name = manager_name.substring(0, manager_name.indexOf(" ")) + manager_name.substring(manager_name.lastIndexOf(" "));
-                    }
-                } else {
-                    manager_employeeNumber = "-99999999";
-                    manager_name = "NO MANAGER";
-                    original_manager_name = "";
-                }
+                        if (manager_name.contains("\"")) {
 
-                EmployeeNode tempManager = new EmployeeNode("TEMPORARY MANAGER", "TEMPORARY MANAGER", null, "-999999999");
-                tempEmployee = (new EmployeeNode(first_name, last_name, name, middle_name, former_name, preferred_name,
-                        email, title, company, department, payroll_department, location, month, day, gender, tempManager,
-                        employeeNumber, manager_employeeNumber, original_manager_name));
-                tempEmployee.setManager_employee_number(manager_employeeNumber);
+                            currentline = currentline.substring(currentline.indexOf("\"") + 1);
+                            name = currentline.substring(0, currentline.indexOf("\""));
+                            name += " " + name.substring(0, name.indexOf(","));
+                            name = name.substring(name.indexOf(",") + 1);
 
-                if (employees_name.containsKey(name) && (employees_name.containsKey(manager_name))) {
-                    employees_name.get(name).setManager(employees_name.get(manager_name));
-                } else {
-                    employees_name.put(name, tempEmployee);
-                    employees_number.put(employeeNumber, tempEmployee);
-
-                }
-                if (employees_name.containsKey(manager_name)) {
-                    employees_name.get(manager_name).getReporters().add(tempEmployee);
-                    employees_name.get(name).setManager(employees_name.get(manager_name));
-                }
-
-                relations.put(name, manager_name);
-            }
-
-            int y = 0;
-
-            for (EmployeeNode HPValue : employees_name.values()) {
-                if (HPValue.getManager().getName().equals("TEMPORARY MANAGER")) {
-                    y++;
-                }
-            }
-
-            for (EmployeeNode HPValue : employees_name.values()) {
-                if (HPValue.getManager().getName().equals("TEMPORARY MANAGER")) {
-                    if (relations.containsKey(HPValue.getName())) {
-                        if (employees_name.containsKey(relations.get(HPValue.getName()))) {
-                            if (relations.get(HPValue.getName()).equals("NO MANAGER")) {
-                                tempEmployee = new EmployeeNode("NO MANAGER", "NO MANAGER", null, "-99999999");
-                                HPValue.setManager(tempEmployee);
-                                tempEmployee.getReporters().add(HPValue);
-                                employees_number.put("-99999999", tempEmployee);
-                            }
-
-                            HPValue.setManager(employees_number.get(HPValue.getManager_employee_number()));
-                            employees_number.get(HPValue.getManager_employee_number()).getReporters().add(HPValue);
-                            y--;
+                            manager_name = manager_name.substring(manager_name.lastIndexOf("\"") + 1);
+                            manager_name += " " + manager_name.substring(0, manager_name.indexOf(","));
+                            manager_name = manager_name.substring(manager_name.indexOf(",") + 1);
+                            manager_name = manager_name.substring(0, manager_name.indexOf(" ")) + manager_name.substring(manager_name.lastIndexOf(" "));
                         }
 
-                        if (HPValue.getManager().getName().equals("TEMPORARY MANAGER")) {
-                            if (employees_number.containsKey(HPValue.getManager_employee_number())) {
+                        if (!relations.containsKey(manager_name)) {
+                            manager_name = manager_name.substring(0, manager_name.indexOf(" ")) + manager_name.substring(manager_name.lastIndexOf(" "));
+                        }
+                    } else {
+                        manager_employeeNumber = "-99999999";
+                        manager_name = "NO MANAGER";
+                        original_manager_name = "";
+                    }
+
+                    EmployeeNode tempManager = new EmployeeNode("TEMPORARY MANAGER", "TEMPORARY MANAGER", null, "-999999999");
+                    tempEmployee = (new EmployeeNode(first_name, last_name, name, middle_name, former_name, preferred_name,
+                            email, title, company, department, payroll_department, location, month, day, gender, tempManager,
+                            employeeNumber, manager_employeeNumber, original_manager_name));
+                    tempEmployee.setManager_employee_number(manager_employeeNumber);
+
+                    if (employees_name.containsKey(name) && (employees_name.containsKey(manager_name))) {
+                        employees_name.get(name).setManager(employees_name.get(manager_name));
+                    } else {
+                        employees_name.put(name, tempEmployee);
+                        employees_number.put(employeeNumber, tempEmployee);
+
+                    }
+                    if (employees_name.containsKey(manager_name)) {
+                        employees_name.get(manager_name).getReporters().add(tempEmployee);
+                        employees_name.get(name).setManager(employees_name.get(manager_name));
+                    }
+
+                    relations.put(name, manager_name);
+                }
+
+                int y = 0;
+
+                for (EmployeeNode HPValue : employees_name.values()) {
+                    if (HPValue.getManager().getName().equals("TEMPORARY MANAGER")) {
+                        y++;
+                    }
+                }
+
+                for (EmployeeNode HPValue : employees_name.values()) {
+                    if (HPValue.getManager().getName().equals("TEMPORARY MANAGER")) {
+                        if (relations.containsKey(HPValue.getName())) {
+                            if (employees_name.containsKey(relations.get(HPValue.getName()))) {
+                                if (relations.get(HPValue.getName()).equals("NO MANAGER")) {
+                                    tempEmployee = new EmployeeNode("NO MANAGER", "NO MANAGER", null, "-99999999");
+                                    HPValue.setManager(tempEmployee);
+                                    tempEmployee.getReporters().add(HPValue);
+                                    employees_number.put("-99999999", tempEmployee);
+                                }
+
                                 HPValue.setManager(employees_number.get(HPValue.getManager_employee_number()));
+                                employees_number.get(HPValue.getManager_employee_number()).getReporters().add(HPValue);
                                 y--;
                             }
+
+                            if (HPValue.getManager().getName().equals("TEMPORARY MANAGER")) {
+                                if (employees_number.containsKey(HPValue.getManager_employee_number())) {
+                                    HPValue.setManager(employees_number.get(HPValue.getManager_employee_number()));
+                                    y--;
+                                }
+                            }
                         }
                     }
                 }
+
+                if (y > 1)
+                    System.out.println("Y = " + y);
+
+                System.out.println("The file has been loaded. There are a total of " + x + " employees.");
+                relations = null;
+            }
+            else
+            {
+                System.out.println("You have entered the incorrect file type. Please Try again.");
+                menu();
             }
 
-            if (y > 1)
-                System.out.println("Y = " + y);
-
-            System.out.println("The file has been loaded. There are a total of " + x + " employees.");
-            relations = null;
         } catch (FileNotFoundException fnfe) {
             System.out.println("The file was not found." + fnfe.toString() + ". Please try again");
+            menu();
+        } catch (IOException ioe) {
+            System.out.println("IOException was caught:" + ioe.toString() + ". Please try again");
             menu();
         }
     }
