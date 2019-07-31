@@ -23,6 +23,9 @@ public class EmployeeManager {
     private static boolean quitRunning = false;
 
     public static void main(String[] args) {
+
+        readFile();
+
         System.out.println("Hello and welcome to the Employee Tree Script. Please select what you would like to do from the following menu.");
 
         while (!quitRunning) {
@@ -62,12 +65,14 @@ public class EmployeeManager {
                 }
             }
 
-                menu();
-                break;
+            menu();
+            break;
 
-            case ('I'):
-                loadFile();
+            case ('I'): {
+                System.out.print("Please write the name of the file: ");
+                loadFile(sc.nextLine());
                 break;
+            }
 
             case ('F'):
                 findEmployee();
@@ -76,7 +81,7 @@ public class EmployeeManager {
             case ('D'): {
                 System.out.print("Please enter a name you would like to search for: ");
 
-                lookForEmployee(sc.nextLine());
+                directory(sc.nextLine());
                 break;
             }
 
@@ -146,7 +151,7 @@ public class EmployeeManager {
      * @param name The name of the person to look for
      * @return The name as it is in the system
      */
-    private static String lookForEmployee(String name) {
+    private static String directory(String name) {
         String first_name, last_name;
 
         ArrayList<String> names = new ArrayList<>();
@@ -156,7 +161,13 @@ public class EmployeeManager {
                 if (!names.contains(HPValue.getName())) {
                     names.add(HPValue.getName());
                 }
-            } else if (name.contains(" ")) {
+            }
+        }
+        if (names.size() > 0) {
+
+        } else if (name.contains(" ")) {
+            for (EmployeeNode HPValue : employees_name.values()) {
+
                 first_name = name.substring(0, name.indexOf(" "));
                 last_name = name.substring(name.indexOf(" ") + 1);
 
@@ -169,7 +180,10 @@ public class EmployeeManager {
                         names.add(HPValue.getName());
                     }
                 }
-            } else {
+            }
+        } else {
+            for (EmployeeNode HPValue : employees_name.values()) {
+
                 if (HPValue.getFirstName().trim().toLowerCase().contains(name.toLowerCase())) {
                     if (!names.contains(HPValue.getName())) {
                         names.add(HPValue.getName());
@@ -181,6 +195,7 @@ public class EmployeeManager {
                         names.add(HPValue.getName());
                     }
                 }
+
             }
         }
 
@@ -209,7 +224,7 @@ public class EmployeeManager {
         System.out.print("Please enter the name of the employee: ");
         String findEmployee = sc.nextLine();
 
-        String findNewEmployee = lookForEmployee(findEmployee);
+        String findNewEmployee = directory(findEmployee);
 
         if (!findNewEmployee.equals("")) {
             findEmployee = findNewEmployee;
@@ -257,20 +272,15 @@ public class EmployeeManager {
                 }
             }
         }
-
-//        System.out.println(findEmployee + " is not in the system.");
     }
 
     /**
      * Loads the data present in the .csv file
      */
-    private static void loadFile() {
+    private static void loadFile(String filename) {
         int x = 0;
 
         try {
-            System.out.print("Please write the name of the file: ");
-            String filename = sc.nextLine();
-
             filename = filename.replaceAll("\"", "");
 
             if (filename.contains(".xls")) {
@@ -508,12 +518,18 @@ public class EmployeeManager {
 
                 System.out.println("The file has been loaded. There are a total of " + x + " employees.");
                 relations = null;
-            }
-            else
-            {
+            } else {
                 System.out.println("You have entered the incorrect file type. Please Try again.");
                 menu();
             }
+
+            File f = new File("link.txt");
+            FileWriter fw = new FileWriter(f);
+
+            fw.write(filename);
+
+            fw.flush();
+            fw.close();
 
         } catch (FileNotFoundException fnfe) {
             System.out.println("The file was not found." + fnfe.toString() + ". Please try again");
@@ -610,6 +626,24 @@ public class EmployeeManager {
             }
         } catch (IOException io) {
             System.out.println("The file could not be opened. " + io.toString());
+        }
+    }
+
+    public static void readFile() {
+        try {
+
+            File f = new File("link.txt");
+
+            sc = new Scanner(f);
+
+            String fileName = sc.nextLine();
+
+            loadFile(fileName);
+
+        } catch (FileNotFoundException f) {
+            System.out.println("No file has been found: " + f.toString());
+        } catch (IOException i) {
+            System.out.println(i.toString());
         }
     }
 }
