@@ -629,6 +629,9 @@ public class EmployeeManager {
         }
     }
 
+    /**
+     * Looks for a file at the previous location and reads the file if present.
+     */
     public static void readFile() {
         try {
 
